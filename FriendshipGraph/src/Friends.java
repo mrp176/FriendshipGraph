@@ -1,8 +1,11 @@
 /**
+ * Friend Graph Project
+ * Rutgers University - CS112
  * 
  * @author Marco Giancarli
  * @author Milan Patel
  * 
+ * May 2, 2014
  */
 
 import java.lang.*;
@@ -19,6 +22,13 @@ class Vertex {
 		this.school = school;
 		friends = new ArrayList<Integer>();
 	}
+	
+	public String toString() {
+		if(school == null) {
+			return name + "|n";
+		}
+		return name + "|y|" + school;
+	}
 }
 
 public class Friends {
@@ -30,45 +40,50 @@ public class Friends {
 	 * Builds the graph from the graph file.
 	 */
 	public Friends(String graphFile) {
-		Scanner fileReader = new Scanner(graphFile);
-		final int NUM_PEOPLE = fileReader.nextInt();
-		friendGraph = new Vertex[NUM_PEOPLE];
-		// This hashmap allows O(1) access to a person's index from their name.
-		HashMap<String,Integer> personMap = new HashMap<String,Integer>(NUM_PEOPLE,0.75f);
-		String[] personData, friendship;
-		String name, school;
-		int indexA, indexB;
-		
-		// Construct each vertex and put it into the array.
-		for(int i=0; i<friendGraph.length; i++) {
-			personData = fileReader.nextLine().split("|");
-			name = personData[0];
-			school = personData[1].equals("y") ? personData[2] : null;
-			friendGraph[i] = new Vertex(name, school);
-			personMap.put(name, i);
-		}
-		
-		// Add all friendships to the adjacency lists in each vertex.
-		while(fileReader.hasNext()) {
-			friendship = fileReader.nextLine().split("|");
-			indexA = personMap.get(friendship[0]);
-			indexB = personMap.get(friendship[1]);
-			friendGraph[indexA].friends.add(indexB);
-			friendGraph[indexB].friends.add(indexA);
+		Scanner fileReader;
+		try {
+			fileReader = new Scanner(new File(graphFile));
+			final int NUM_PEOPLE = Integer.parseInt(fileReader.nextLine());
+			friendGraph = new Vertex[NUM_PEOPLE];
+			// This hashmap allows O(1) access to a person's index from their name.
+			HashMap<String,Integer> personMap = new HashMap<String,Integer>(NUM_PEOPLE,0.75f);
+			String[] personData, friendship;
+			String name, school;
+			int indexA, indexB;
+			
+			// Construct each vertex and put it into the array.
+			for(int i=0; i<friendGraph.length; i++) {
+				personData = fileReader.nextLine().split("\\|");
+				name = personData[0];
+				school = personData[1].equals("y") ? personData[2] : null;
+				friendGraph[i] = new Vertex(name, school);
+				personMap.put(name, i);
+			}
+			
+			// Add all friendships to the adjacency lists in each vertex.
+			while(fileReader.hasNext()) {
+				friendship = fileReader.nextLine().split("\\|");
+				indexA = personMap.get(friendship[0]);
+				indexB = personMap.get(friendship[1]);
+				friendGraph[indexA].friends.add(indexB);
+				friendGraph[indexB].friends.add(indexA);
+			}
+			
+			fileReader.close();
+		} catch (FileNotFoundException e) {
+			System.out.println("That file doesn't appear to exist. Quitting...");
+			System.exit(1);
 		}
 	}
 	
 	/**
 	 * @param schoolName Name of school (case insensitive), e.g. "penn state"
-	 * @return subgraph Subgraph of original graph, vertices are all students 
-	 * at the given school, edges are a subset of the edges of the original 
-	 * graph such that both endpoints are students at the school. The subgraph 
-	 * must be in stored in the adjacency linked lists form, just as for the 
-	 * original graph.
+	 * @return subgraph String representing the vertices and 
+	 * friendships with the same format as the original file.
 	 */
-	public ArrayList<Vertex> subgraph(String schoolName) {
-		ArrayList<Vertex> subgraph = new ArrayList<Vertex>();
-		
+	public String subgraph(String schoolName) {
+		String subgraph = "";
+		// what do you do when nobody is in that school? exception?
 		return subgraph;
 	}
 	
@@ -78,27 +93,32 @@ public class Friends {
 	 * @return chain The shortest chain of people in the graph starting at the 
 	 * first and ending at the second.
 	 */
-	public ArrayList<Vertex> shortestPath(String start, String end) {
-		ArrayList<Vertex> path = new ArrayList<Vertex>();
-		
+	public String shortestPath(String start, String end) {
+		String path = "";
+		// what do you do when there is no path? return string saying so
 		return path;
 	}
 	
 	/**
 	 * @param schoolName Name of the school to be found.
-	 * @return The subgraphs for each of the cliques.
+	 * @return The subgraphs for each of the cliques at this school. Use the 
+	 * same formatting as the original file.
 	 */
-	public ArrayList<Vertex> cliques(String schoolName) {
-		ArrayList<Vertex> clique = new ArrayList<Vertex>();
-		
-		return clique;
+	public String cliques(String schoolName) {
+		int cliqueCount = 1;
+		String cliques = "";
+		while(cliqueCount == 6969) { // yeah change this shit
+			cliques = "Clique " + cliqueCount++ + ":\n";
+		}
+		return cliques;
 	}
 	
 	/**
-	 * @return Names of all people who are connectors in the graph
+	 * @return Names of all people who are connectors in the graph, separated 
+	 * by commas.
 	 */
-	public ArrayList<String> connectors() {
-		ArrayList<String> connectors = new ArrayList<String>();
+	public String connectors() {
+		String connectors = "";
 		
 		return connectors;
 	}
@@ -127,8 +147,40 @@ public class Friends {
 		System.out.println("What is the graph file name?");
 		String graphFile = sc.next();
 		Friends friends = new Friends(graphFile);
-		for(int i=0; i<friends.friendGraph.length; i++) {
-			System.out.print(friends.friendGraph[i]);
+		
+		int action = 0;
+		while(action != 5) {
+			System.out.println("Enter the number of the operation you wish to perform.");
+			System.out.println("1: Students at a school");
+			System.out.println("2: Shortest introduction path");
+			System.out.println("3: Cliques at school");
+			System.out.println("4: Connectors");
+			System.out.println("5: Quit");
+			
+			action = sc.nextInt();
+			switch(action) {
+			case 1:
+				System.out.println("Enter the name of a school to find the subgraph of:");
+				System.out.println(friends.subgraph(sc.nextLine()));
+				break;
+			case 2:
+				System.out.println("Enter the names of the people you want to find the shortest path between:");
+				System.out.println(friends.shortestPath(sc.next(), sc.next()));
+				break;
+			case 3:
+				System.out.println("Enter the name of a school to find the cliques of:");
+				System.out.println(friends.cliques(sc.nextLine()));
+				break;
+			case 4:
+				System.out.println(friends.connectors());
+				break;
+			case 5:
+				System.exit(0);
+			default:
+				System.out.println("Invalid number. Try again.");
+				break;
+			}
 		}
+		sc.close();
 	}
 }
